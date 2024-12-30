@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 
 class DockItem extends StatelessWidget {
-  const DockItem({super.key, required this.icon});
+  const DockItem({
+    super.key,
+    required this.icon,
+  });
   final IconData icon;
   @override
   Widget build(BuildContext context) {
     return Container(
+      // duration: Duration(seconds: 1),
       constraints: const BoxConstraints(minWidth: 48),
       height: 48,
       margin: const EdgeInsets.all(8),
