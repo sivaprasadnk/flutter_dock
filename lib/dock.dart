@@ -10,7 +10,7 @@ class Dock<T> extends StatefulWidget {
   });
 
   /// Initial [T] items to put in this [Dock].
-  final List<T> items;
+  final List<IconData> items;
 
   /// Builder building the provided [T] item.
   // final Widget Function(T) builder;
@@ -22,7 +22,9 @@ class Dock<T> extends StatefulWidget {
 /// State of the [Dock] used to manipulate the [_items].
 class _DockState<T> extends State<Dock<T>> {
   /// [T] items being manipulated.
-  late final List<T> _items = widget.items.toList();
+  late final List<IconData> _items = widget.items.toList();
+
+  int? draggedItemIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -35,8 +37,36 @@ class _DockState<T> extends State<Dock<T>> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: _items.asMap().entries.map((e) {
-          final item = e.value as IconData;
-          return DockItem(icon: item);
+          final index = e.key;
+          final icon = e.value;
+          return DragTarget(
+            onWillAcceptWithDetails: (details) {
+              final index = _items.indexOf(details.data as IconData);
+              setState(() {
+                // _hoveredIndex = index;
+                draggedItemIndex = index;
+              });
+              return true;
+            },
+            onAcceptWithDetails: (details) {
+              final oldIndex = _items.indexOf(details.data as IconData);
+              setState(() {
+                _items.removeAt(oldIndex);
+                _items.insert(index, details.data as IconData);
+              });
+            },
+            builder: (context, candidateData, rejectedData) {
+              return Draggable(
+                data: icon,
+                childWhenDragging: SizedBox.shrink(),
+                feedback: Material(
+                  color: Colors.transparent,
+                  child: DockItem(icon: icon),
+                ),
+                child: DockItem(icon: icon),
+              );
+            },
+          );
         }).toList(),
       ),
     );
