@@ -216,6 +216,8 @@ class _DockState<T> extends State<Dock<T>> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint("## hoveringItemIndex $hoveringItemIndex");
+    debugPrint("## draggingIndex $draggingItemIndex");
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
@@ -227,7 +229,6 @@ class _DockState<T> extends State<Dock<T>> {
         children: _items.asMap().entries.expand((e) {
           final index = e.key;
           final icon = e.value;
-
           return [
             MouseRegion(
               cursor: SystemMouseCursors.click,
@@ -242,26 +243,34 @@ class _DockState<T> extends State<Dock<T>> {
                 });
               },
               child: DragTarget(
-                onMove: (details) {
-                  draggedItemIndex1 = _items.indexOf(details.data as IconData);
-                  debugPrint("## draggedItemIndex1 $draggedItemIndex1");
-                  setState(() {});
-                },
                 onWillAcceptWithDetails: (details) {
+                  debugPrint('## draggingItemIndexx $draggingItemIndex ');
                   setState(() {
                     draggingItemIndex =
                         _items.indexOf(details.data as IconData);
                   });
-                  return draggingItemIndex != index;
+                  return true;
                 },
                 onAcceptWithDetails: (details) {
                   final oldIndex = _items.indexOf(details.data as IconData);
-                  if (oldIndex != -1) {
+                  debugPrint("##### oldindex $oldIndex");
+                  // if (d != -1) {
                     setState(() {
-                      _items.removeAt(oldIndex);
-                      _items.insert(index, details.data as IconData);
+                    _items.removeAt(draggingItemIndex!);
+                    if (hoveringItemIndex == null) {
+                      debugPrint("### here");
+                      _items.insert(0, details.data as IconData);
+                    } else {
+                      if (hoveringItemIndex! < draggingItemIndex!) {
+                        _items.insert(
+                            hoveringItemIndex! + 1, details.data as IconData);
+                      } else {
+                        _items.insert(
+                            hoveringItemIndex!, details.data as IconData);
+                      }
+                    }
                     });
-                  }
+                  // }
                   draggingItemIndex = null;
                 },
                 builder: (context, candidateData, rejectedData) {
@@ -271,7 +280,10 @@ class _DockState<T> extends State<Dock<T>> {
                     onDraggableCanceled: (velocity, offset) {
                       setState(() {
                         dragOffset = offset;
-                        draggingItemIndex = null;
+                        if (draggingItemIndex != null &&
+                            hoveringItemIndex == null) {
+                          draggingItemIndex = null;
+                        }
                       });
                     },
                     feedback: Material(
@@ -283,38 +295,30 @@ class _DockState<T> extends State<Dock<T>> {
                     child: AnimatedContainer(
                       key: itemKeys[index],
                       duration: const Duration(milliseconds: 300),
-
-                      /// todo to translate by taking hovering index into consideration
-                      /// and translate x axis
-                      ///
                       transform: Matrix4.identity()
                         ..translate(
                           draggingItemIndex == null
                               ? 0
                               : hoveringItemIndex != null &&
-                                      index == hoveringItemIndex
+                                      index <= hoveringItemIndex!
                                   ? -30
                                   : hoveringItemIndex != null &&
-                                          index == hoveringItemIndex! + 1
-                                      ? 30
-                                      : 0,
-                          calculate(
-                            itemIndex: index,
-                            defaultValue: 0,
-                            hoveredValue: -20,
-                            nearbyValue: -4,
-                          ),
+                                          index > hoveringItemIndex!
+                                      ? 20
+                                      : hoveringItemIndex != null &&
+                                              index == hoveringItemIndex! - 1
+                                          ? -30
+                                          : 0,
+                          draggingItemIndex == null
+                              ? calculate(
+                                  itemIndex: index,
+                                  defaultValue: 0,
+                                  hoveredValue: -15,
+                                  nearbyValue: -4,
+                                )
+                              : 0,
                         ),
-                      child: hoveringItemIndex != null &&
-                              draggingItemIndex != null &&
-                              hoveringItemIndex == index
-                          ? SizedBox(
-                              width: 48,
-                              height: 48,
-                            )
-                          : DockItem(
-                              icon: icon,
-                            ),
+                      child: DockItem(icon: icon),
                     ),
                   );
                 },
