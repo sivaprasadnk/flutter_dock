@@ -1,150 +1,3 @@
-// import 'package:flutter/material.dart';
-// import 'package:flutter_dock/child_when_dragging.dart';
-// import 'package:flutter_dock/dock_item.dart';
-
-// class Dock<T> extends StatefulWidget {
-//   const Dock({
-//     super.key,
-//     this.items = const [],
-//   });
-
-//   final List<IconData> items;
-
-//   @override
-//   State<Dock<T>> createState() => _DockState<T>();
-// }
-
-// class _DockState<T> extends State<Dock<T>> {
-//   late final List<IconData> _items = widget.items.toList();
-//   int? draggedItemIndex;
-//   int? hoveringItemIndex;
-
-//   Map<int, GlobalKey> itemKeys = {};
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     for (int i = 0; i < _items.length; i++) {
-//       itemKeys[i] = GlobalKey();
-//     }
-//   }
-
-//   double calculate({
-//     required int itemIndex,
-//     required double defaultValue,
-//     required double hoveredValue,
-//     required double nearbyValue,
-//   }) {
-//     if (hoveringItemIndex == null) {
-//       return defaultValue;
-//     }
-
-//     final int distance = (hoveringItemIndex! - itemIndex).abs();
-//     const double firstNeighborMultiplier = 0.5;
-//     const double secondNeighborMultiplier = 0.25;
-//     const double distantNeighborMultiplier = 0.15;
-
-//     if (distance == 0) {
-//       return hoveredValue;
-//     } else if (distance == 1) {
-//       return defaultValue +
-//           (hoveredValue - defaultValue) * firstNeighborMultiplier;
-//     } else if (distance == 2) {
-//       return defaultValue +
-//           (hoveredValue - defaultValue) * secondNeighborMultiplier;
-//     } else if (distance < _items.length) {
-//       return defaultValue +
-//           (nearbyValue - defaultValue) * distantNeighborMultiplier;
-//     } else {
-//       return defaultValue;
-//     }
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       decoration: BoxDecoration(
-//         borderRadius: BorderRadius.circular(8),
-//         color: Colors.black12,
-//       ),
-//       padding: const EdgeInsets.all(4),
-//       child: Row(
-//         mainAxisSize: MainAxisSize.min,
-//         children: _items.asMap().entries.map((e) {
-//           final index = e.key;
-//           final icon = e.value;
-
-//           return MouseRegion(
-//             cursor: SystemMouseCursors.click,
-//             onEnter: (event) {
-//               setState(() {
-//                 hoveringItemIndex = index;
-//               });
-//             },
-//             onExit: (event) {
-//               setState(() {
-//                 hoveringItemIndex = null;
-//               });
-//             },
-//             child: DragTarget(
-//               onWillAcceptWithDetails: (details) {
-//                 setState(() {
-//                   draggedItemIndex = _items.indexOf(details.data as IconData);
-//                 });
-//                 return true;
-//               },
-//               onAcceptWithDetails: (details) {
-//                 final oldIndex = _items.indexOf(details.data as IconData);
-//                 if (oldIndex != -1) {
-//                   setState(() {
-//                     _items.removeAt(oldIndex);
-//                     _items.insert(index, details.data as IconData);
-//                   });
-//                 }
-//               },
-//               builder: (context, candidateData, rejectedData) {
-//                 return Draggable(
-//                   data: icon,
-
-//                   childWhenDragging: ChildWhenDragging(),
-//                   onDraggableCanceled: (velocity, offset) {
-//                     setState(() {
-//                       draggedItemIndex = null;
-//                     });
-//                   },
-//                   feedback: Material(
-//                     color: Colors.transparent,
-//                     child: DockItem(
-//                       icon: icon,
-//                     ),
-//                   ),
-//                   child: AnimatedContainer(
-//                     key: itemKeys[index],
-//                     duration: const Duration(seconds: 1),
-//                     transform: Matrix4.identity()
-//                       ..translate(
-//                         0,
-//                         calculate(
-//                           itemIndex: index,
-//                           defaultValue: 0,
-//                           hoveredValue: -20,
-//                           nearbyValue: -4,
-//                         ),
-//                       ),
-//                     child: DockItem(
-//                       icon: icon,
-//                     ),
-//                   ),
-//                 );
-//               },
-//             ),
-//           );
-//         }).toList(),
-//       ),
-//     );
-//   }
-// }
-
 import 'package:flutter/material.dart';
 import 'package:flutter_dock/child_when_dragging.dart';
 import 'package:flutter_dock/dock_item.dart';
@@ -168,12 +21,9 @@ class Dock<T> extends StatefulWidget {
 class _DockState<T> extends State<Dock<T>> {
   late final List<IconData> _items = widget.items.toList();
   int? draggingItemIndex;
-  int? draggedItemIndex1;
   int? hoveringItemIndex;
 
   Map<int, GlobalKey> itemKeys = {};
-
-  Offset? dragOffset;
 
   @override
   void initState() {
@@ -183,41 +33,54 @@ class _DockState<T> extends State<Dock<T>> {
     }
   }
 
-  double calculate({
-    required int itemIndex,
-    required double defaultValue,
-    required double hoveredValue,
-    required double nearbyValue,
-  }) {
-    if (hoveringItemIndex == null) {
-      return defaultValue;
+  double calculateYValue({required int itemIndex}) {
+    /// if any item is dragged or, when no item is hovered
+    if (draggingItemIndex != null || hoveringItemIndex == null) {
+      return 0;
     }
 
+    /// absoulte value of distance between hovered-item and item
     final int distance = (hoveringItemIndex! - itemIndex).abs();
     const double firstNeighborMultiplier = 0.5;
     const double secondNeighborMultiplier = 0.25;
     const double distantNeighborMultiplier = 0.15;
+    const double hoveredValue = -20;
+    const double nearbyValue = -4;
 
     if (distance == 0) {
       return hoveredValue;
     } else if (distance == 1) {
-      return defaultValue +
-          (hoveredValue - defaultValue) * firstNeighborMultiplier;
+      return (hoveredValue) * firstNeighborMultiplier;
     } else if (distance == 2) {
-      return defaultValue +
-          (hoveredValue - defaultValue) * secondNeighborMultiplier;
+      return (hoveredValue) * secondNeighborMultiplier;
     } else if (distance < _items.length) {
-      return defaultValue +
-          (nearbyValue - defaultValue) * distantNeighborMultiplier;
+      return (nearbyValue) * distantNeighborMultiplier;
     } else {
-      return defaultValue;
+      return 0;
     }
+  }
+
+  /// to calculate how much the items to translate or move on x axis, or horizontally
+  double calculateXValue({required int itemIndex}) {
+    /// when no item is being dragged
+    if (draggingItemIndex == null) {
+      return 0;
+    }
+
+    /// if item is dragged, hovered over an index and item index <= index of item being dragged
+    if (hoveringItemIndex != null && itemIndex <= hoveringItemIndex!) {
+      return -30;
+    }
+
+    /// if item is dragged, hovered over an index and item index >= index of item being dragged
+    if (hoveringItemIndex != null && itemIndex >= hoveringItemIndex!) {
+      return 20;
+    }
+    return 0;
   }
 
   @override
   Widget build(BuildContext context) {
-    debugPrint("## hoveringItemIndex $hoveringItemIndex");
-    debugPrint("## draggingIndex $draggingItemIndex");
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
@@ -244,21 +107,17 @@ class _DockState<T> extends State<Dock<T>> {
               },
               child: DragTarget(
                 onWillAcceptWithDetails: (details) {
-                  debugPrint('## draggingItemIndexx $draggingItemIndex ');
                   setState(() {
                     draggingItemIndex =
                         _items.indexOf(details.data as IconData);
                   });
-                  return true;
+                  return draggingItemIndex != null &&
+                      draggingItemIndex != hoveringItemIndex!;
                 },
                 onAcceptWithDetails: (details) {
-                  final oldIndex = _items.indexOf(details.data as IconData);
-                  debugPrint("##### oldindex $oldIndex");
-                  // if (d != -1) {
-                    setState(() {
+                  setState(() {
                     _items.removeAt(draggingItemIndex!);
                     if (hoveringItemIndex == null) {
-                      debugPrint("### here");
                       _items.insert(0, details.data as IconData);
                     } else {
                       if (hoveringItemIndex! < draggingItemIndex!) {
@@ -269,8 +128,7 @@ class _DockState<T> extends State<Dock<T>> {
                             hoveringItemIndex!, details.data as IconData);
                       }
                     }
-                    });
-                  // }
+                  });
                   draggingItemIndex = null;
                 },
                 builder: (context, candidateData, rejectedData) {
@@ -279,11 +137,7 @@ class _DockState<T> extends State<Dock<T>> {
                     childWhenDragging: ChildWhenDragging(),
                     onDraggableCanceled: (velocity, offset) {
                       setState(() {
-                        dragOffset = offset;
-                        if (draggingItemIndex != null &&
-                            hoveringItemIndex == null) {
-                          draggingItemIndex = null;
-                        }
+                        draggingItemIndex = null;
                       });
                     },
                     feedback: Material(
@@ -297,26 +151,8 @@ class _DockState<T> extends State<Dock<T>> {
                       duration: const Duration(milliseconds: 300),
                       transform: Matrix4.identity()
                         ..translate(
-                          draggingItemIndex == null
-                              ? 0
-                              : hoveringItemIndex != null &&
-                                      index <= hoveringItemIndex!
-                                  ? -30
-                                  : hoveringItemIndex != null &&
-                                          index > hoveringItemIndex!
-                                      ? 20
-                                      : hoveringItemIndex != null &&
-                                              index == hoveringItemIndex! - 1
-                                          ? -30
-                                          : 0,
-                          draggingItemIndex == null
-                              ? calculate(
-                                  itemIndex: index,
-                                  defaultValue: 0,
-                                  hoveredValue: -15,
-                                  nearbyValue: -4,
-                                )
-                              : 0,
+                          calculateXValue(itemIndex: index),
+                          calculateYValue(itemIndex: index),
                         ),
                       child: DockItem(icon: icon),
                     ),
