@@ -75,8 +75,6 @@ class _DockState<T> extends State<Dock<T>> {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint("### hoveringItemIndex :$hoveringItemIndex");
-    debugPrint("### draggingItemIndex :$draggingItemIndex");
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
