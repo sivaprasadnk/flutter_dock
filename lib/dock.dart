@@ -32,17 +32,6 @@ class _DockState<T> extends State<Dock<T>> {
       itemKeys[i] = GlobalKey();
     }
   }
-
-  // Calculate the X translation for an item when dragging or hovering
-  double _calculateXValue(int itemIndex) {
-    if (draggingItemIndex == null) return 0; // No item is being dragged
-    if (hoveringItemIndex == null) return 0; // No item is being hovered
-    // Adjust translation based on dragging and hovering item positions
-    if (itemIndex <= hoveringItemIndex!) return -30;
-    if (itemIndex >= hoveringItemIndex!) return 20;
-    return 0;
-  }
-
   // Calculate the Y translation for an item based on its distance from the hovered item
   double _calculateYValue({
     required int itemIndex,
@@ -86,6 +75,8 @@ class _DockState<T> extends State<Dock<T>> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint("### hoveringItemIndex :$hoveringItemIndex");
+    debugPrint("### draggingItemIndex :$draggingItemIndex");
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
@@ -158,7 +149,8 @@ class _DockState<T> extends State<Dock<T>> {
                           duration: const Duration(milliseconds: 300),
                           transform: Matrix4.identity()
                             ..translate(
-                              _calculateXValue(index), // Apply X translation
+                              0,
+                              // _calculateXValue(index), // Apply X translation
                               _calculateYValue(
                                 itemIndex: index,
                                 baseValue: 0,
