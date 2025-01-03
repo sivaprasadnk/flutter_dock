@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dock/child_when_dragging.dart';
+import 'package:flutter_dock/constants.dart';
 import 'package:flutter_dock/dock_item.dart';
 
 class Dock<T> extends StatefulWidget {
@@ -177,7 +178,7 @@ class _DockState<T> extends State<Dock<T>> {
                                 : 0,
                           ),
                           constraints: BoxConstraints(
-                            minWidth: 48,
+                            minWidth: iconSize,
                             maxWidth: _calculateSize(
                                 index), // Set max width based on hover/drag size
                             maxHeight: _calculateSize(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dock/constants.dart';
 
 /// A widget representing an item in the dock.
 class DockItem extends StatelessWidget {
@@ -15,7 +16,9 @@ class DockItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       constraints: const BoxConstraints(
-          minWidth: 48, minHeight: 48), // Ensure a minimum size for the item
+        minWidth: iconSize,
+        minHeight: iconSize,
+      ), // Ensure a minimum size for the item
       margin: const EdgeInsets.all(8), // Apply margin around the dock item
       decoration: BoxDecoration(
         borderRadius:

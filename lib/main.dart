@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dock/constants.dart';
 import 'package:flutter_dock/dock.dart';
-import 'package:flutter_dock/icons_list.dart';
 
 /// The entry point of the application.
 ///

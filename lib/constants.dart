@@ -7,3 +7,5 @@ var iconsList = [
   Icons.camera,
   Icons.photo,
 ];
+
+const double iconSize = 48;
